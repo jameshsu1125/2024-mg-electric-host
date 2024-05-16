@@ -2,12 +2,15 @@ import react from '@vitejs/plugin-react';
 import { certificateFor } from 'devcert';
 import { resolve } from 'path';
 import { defineConfig, loadEnv } from 'vite';
+import cssInjectedByJsPlugin from 'vite-plugin-css-injected-by-js';
 import { createHtmlPlugin } from 'vite-plugin-html';
 
 // https://vitejs.dev/config/
 export default defineConfig(async ({ mode }) => {
   const env = loadEnv(mode, './src/pages');
   const { key, cert } = await certificateFor('localhost');
+
+  const base = 'https://mg-host.netlify.app/';
 
   return {
     base: './',
@@ -20,11 +23,16 @@ export default defineConfig(async ({ mode }) => {
         input: {
           index: resolve(__dirname, 'src/pages/index.html'),
         },
+        output: {
+          entryFileNames: `assets/[name].js`,
+          chunkFileNames: `assets/[name].js`,
+        },
       },
     },
     css: {
       preprocessorOptions: {
         less: {
+          rootpath: base,
           math: 'always',
           globalVars: {
             mainColor: 'red',
@@ -45,6 +53,7 @@ export default defineConfig(async ({ mode }) => {
           },
         },
       }),
+      cssInjectedByJsPlugin(),
     ],
     resolve: {
       alias: {
